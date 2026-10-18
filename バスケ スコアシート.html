@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<title>バスケ スコアシート</title>
+<style>
+:root{--bg:#f6f6f4;--fg:#1c1c1a;--card:#fff;--bd:#d8d8d2;--a:#c2410c;--b:#1d4ed8;--sel:#fde68a;--mut:#777;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171716;--fg:#eee;--card:#242422;--bd:#3a3a36;--sel:#6b5a12;--mut:#999}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.4 -apple-system,"Hiragino Sans",sans-serif;padding-bottom:calc(205px + env(safe-area-inset-bottom,0px))}
+.top{display:flex;gap:6px;padding:8px;align-items:center;flex-wrap:wrap}
+.top button,.bar button{font:inherit}
+.q{display:flex;gap:4px;flex:1}
+.q button{flex:1;padding:6px 0;border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:6px}
+.q button.on{background:var(--fg);color:var(--bg)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 8px}
+.col{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px;min-width:0}
+.col.A{border-top:4px solid var(--a)}.col.B{border-top:4px solid var(--b)}
+.col input.nm{width:100%;border:0;background:transparent;color:var(--fg);font-weight:700;font-size:14px;padding:2px 0}
+.sc{font-size:44px;font-weight:800;line-height:1.1}
+.A .sc{color:var(--a)}.B .sc{color:var(--b)}
+.meta{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mut);margin:4px 0}
+.tf.hot{color:#dc2626;font-weight:700}
+.meta button{border:1px solid var(--bd);background:transparent;color:var(--fg);border-radius:6px;padding:3px 6px;font-size:12px}
+.pl{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:5px 4px;border-radius:6px;border:1px solid transparent;cursor:pointer}
+.pl.sel{background:var(--sel);border-color:#d4a017}
+.pl .n{font-weight:800;width:26px}.pl .p{width:24px;text-align:right}
+.pl .f{display:flex;gap:2px;flex-wrap:wrap;flex:1;justify-content:flex-end}
+.pl .f i{font-style:normal;font-size:11px;min-width:16px;text-align:center;border:1px solid var(--bd);border-radius:3px}
+.pl.out .n{color:#dc2626}
+.add{display:flex;gap:4px;margin-top:6px}
+.add input{width:100%;min-width:0;padding:6px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--fg)}
+.add button{padding:6px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--fg)}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--bd);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))}
+.bar .r{display:flex;gap:6px;margin-top:6px}
+.bar button{flex:1;padding:12px 0;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--fg);font-weight:700;font-size:16px}
+.bar .pt{background:var(--fg);color:var(--bg)}
+.bar .fl{font-size:15px}
+#st{font-size:12px;color:var(--mut);min-height:16px}
+.log{padding:8px}
+.log table{border-collapse:collapse;width:100%;background:var(--card)}
+.log td,.log th{border:1px solid var(--bd);padding:4px;text-align:center}
+.rs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.rs div.it{display:flex;justify-content:space-between;padding:3px 6px;border-bottom:1px solid var(--bd);background:var(--card)}
+.A .x{color:var(--a)}.B .x{color:var(--b)}
+.sh{background:#fff;color:#111;margin:8px;padding:8px;border:1px solid #999;overflow-x:auto;font-size:11px}
+.sh .in{min-width:760px}
+.sh table{border-collapse:collapse}
+.sh td,.sh th{border:1px solid #444;padding:1px 3px;text-align:center;height:17px}
+.sh .hd{display:flex;justify-content:space-between;font-weight:700;margin-bottom:6px;font-size:13px}
+.sh .main{display:flex;gap:8px;align-items:flex-start}
+.sh .L{width:250px;flex:none}
+.sh .L table{width:100%;margin-bottom:8px}
+.sh .rsb{display:flex;gap:4px}
+.sh .rsb table td{width:34px;padding:0;font-size:10px;white-space:nowrap}
+.sh .rsb th{font-size:11px;background:#eee}
+.sh s{text-decoration-thickness:1.5px;color:#c00}
+.sh .pn{display:inline-block;min-width:13px;border:1px solid #111;border-radius:50%;font-weight:700;font-size:9px;line-height:11px;margin-left:1px}
+.sh .qe td{border-bottom:3px solid #111}
+.sh .tot{margin-top:8px}
+.sh .tot td,.sh .tot th{padding:3px 8px}
+</style></head><body>
+<div class="top">
+  <div class="q" id="q"></div>
+   <button onclick="savePdf()" id="pb" style="padding:6px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--fg)">PDF保存</button>
+  <button onclick="setView()" id="vb" style="padding:6px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--fg)">記録表</button>
+</div>
+<div id="pm" style="padding:0 8px 6px;font-size:12px;color:var(--mut);min-height:14px"></div>
+<div id="main"></div>
+<div id="md" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center;z-index:9"></div>
+<div class="bar" id="bar">
+  <div id="st"></div>
+  <div class="r"><button class="pt" onclick="pt(1)">+1</button><button class="pt" onclick="pt(2)">+2</button><button class="pt" onclick="pt(3)">+3</button><button onclick="undo()">取消</button></div>
+  <div class="r"><button class="fl" style="font-size:13px" onclick="stat('AST')">アシスト</button><button class="fl" style="font-size:13px" onclick="stat('REB')">リバウンド</button><button class="fl" style="font-size:13px" onclick="stat('STL')">スティール</button><button class="fl" style="font-size:13px" onclick="stat('BLK')">ブロック</button></div>
+  <div class="r"><button class="fl" onclick="foul('P')">P</button><button class="fl" onclick="foul('T')">T</button><button class="fl" onclick="foul('U')">U</button><button class="fl" onclick="foul('D')">D</button></div>
+</div>
+<script>
+var KEY="bb-scoresheet-v1";
+function defP(){var a=[];for(var i=4;i<=18;i++)a.push(String(i));return a}
+var S={nm:{A:{},B:{}},q:1,view:'play',names:{A:'チームA',B:'チームB'},pl:{A:defP(),B:defP()},log:[],sel:null};
+try{var d=localStorage.getItem(KEY);if(d)S=Object.assign(S,JSON.parse(d))}catch(e){}
+if(!S.nm)S.nm={A:{},B:{}};
+if(!S.pl.A.length&&!S.pl.B.length&&!S.log.length)S.pl={A:defP(),B:defP()};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+var QL=["1","2","3","4","OT"];
+function pts(t,n){return S.log.filter(e=>e.k=='pt'&&e.t==t&&(n==null||e.n==n)).reduce((a,e)=>a+e.v,0)}
+function score(t){return pts(t)}
+function fouls(t,n){return S.log.filter(e=>e.k=='f'&&e.t==t&&e.n==n).map(e=>e.v)}
+function tf(t,q){return S.log.filter(e=>e.k=='f'&&e.t==t&&e.q==q).length}
+function to(t){return S.log.filter(e=>e.k=='to'&&e.t==t).length}
+function st(m){document.getElementById('st').textContent=m}
+function pt(v){if(!S.sel)return st('先に選手を選んでください');S.log.push({k:'pt',t:S.sel.t,n:S.sel.n,v:v,q:S.q});st('');R()}
+function foul(c){if(!S.sel)return st('先に選手を選んでください');var t=S.sel.t,n=S.sel.n;S.log.push({k:'f',t:t,n:n,v:c,q:S.q});var f=fouls(t,n);if(f.length>=5)st(n+'番 5ファウル（退場）');else st('');R()}
+var SN={AST:'アシスト',REB:'リバウンド',STL:'スティール',BLK:'ブロック'};
+function stat(c){if(!S.sel)return st('先に選手を選んでください');S.log.push({k:'st',t:S.sel.t,n:S.sel.n,v:c,q:S.q});st(S.sel.n+'番 '+SN[c]);R()}
+function stc(t,n,c){return S.log.filter(e=>e.k=='st'&&e.t==t&&e.n==n&&e.v==c).length}
+function stl(t,n){var x=['AST','REB','STL','BLK'].filter(c=>stc(t,n,c)).map(c=>c+' '+stc(t,n,c));return x.length?'<span style="flex-basis:100%;font-size:11px;color:var(--mut);padding-left:30px">'+x.join('　')+'</span>':''}
+function nmOf(t,n){return (S.nm&&S.nm[t]&&S.nm[t][n])||''}
+function setNm(t,n,v){S.nm[t][n]=v.trim();R()}
+function nml(t,n,sel){
+  if(sel)return '<input value="'+esc(nmOf(t,n))+'" placeholder="名前を入力" onclick="event.stopPropagation()" onchange="setNm(\''+t+'\',\''+esc(n)+'\',this.value)" style="flex-basis:100%;margin:2px 0 2px 30px;padding:4px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--fg);font-size:13px;min-width:0;width:calc(100% - 30px)">';
+  var v=nmOf(t,n);return v?'<span style="flex-basis:100%;font-size:12px;padding-left:30px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(v)+'</span>':'';
+}
+function undo(){S.log.pop();R()}
+var TOT=null,RC=false;
+function tout(t){TOT=t;var m=document.getElementById('md');m.style.display='flex';m.innerHTML='<div style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;width:290px"><b>'+esc(S.names[t])+' タイムアウト</b><div style="margin:10px 0"><input id="tmi" placeholder="時刻（例 5:32）空欄OK" style="width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg);font-size:16px"></div><div style="display:flex;gap:8px"><button onclick="toCancel()" style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--fg)">キャンセル</button><button onclick="toOk()" style="flex:1;padding:10px;border-radius:8px;border:0;background:var(--fg);color:var(--bg);font-weight:700">記録</button></div></div>';}
+function toCancel(){TOT=null;var m=document.getElementById('md');m.style.display='none';m.innerHTML=''}
+function toOk(){var tm=document.getElementById('tmi').value.trim();S.log.push({k:'to',t:TOT,q:S.q,tm:tm});toCancel();R()}
+function toIn(t,a,b){return S.log.filter(e=>e.k=='to'&&e.t==t&&e.q>=a&&e.q<=b).length}
+function toBoxes(t){
+  var g=[['前半',1,2,2],['後半',3,4,3],['OT',5,5,1]];
+  return '<div style="display:flex;gap:6px;font-size:11px;color:var(--mut);flex-wrap:wrap">'+g.map(function(x){
+    var u=toIn(t,x[1],x[2]),s='';
+    for(var i=0;i<Math.max(x[3],u);i++)s+=i<u?'<b style="color:var(--fg)">■</b>':'□';
+    return '<span>'+x[0]+' '+s+'</span>';}).join('')+'</div>';
+}
+function pick(t,n){S.sel=(S.sel&&S.sel.t==t&&S.sel.n==n)?null:{t:t,n:n};R()}
+function addP(t){var i=document.getElementById('in'+t),v=i.value.trim();if(!v)return;if(S.pl[t].indexOf(v)<0){S.pl[t].push(v);S.pl[t].sort((a,b)=>parseInt(a)-parseInt(b))}i.value='';R()}
+function delP(t,n){S.pl[t]=S.pl[t].filter(x=>x!=n);if(S.sel&&S.sel.n==n&&S.sel.t==t)S.sel=null;R()}
+function resetAll(){if(!RC){RC=true;R();return}RC=false;S.log=[];S.nm={A:{},B:{}};S.pl={A:defP(),B:defP()};S.sel=null;S.q=1;R()}
+function setQ(i){S.q=i;R()}
+function setView(){S.view=S.view=='play'?'log':S.view=='log'?'sheet':'play';R()}
+function setName(t,v){S.names[t]=v;save()}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function col(t){
+  var h='<div class="col '+t+'"><input class="nm" value="'+esc(S.names[t])+'" onchange="setName(\''+t+'\',this.value)">';
+  h+='<div class="sc">'+score(t)+'</div>';
+  var f=tf(t,S.q);
+  h+='<div class="meta"><span class="tf'+(f>=5?' hot':'')+'">チームF '+f+'</span><button onclick="tout(\''+t+'\')">タイムアウト '+to(t)+'</button></div>'+toBoxes(t)+'<div style="height:6px"></div>';
+  S.pl[t].forEach(function(n){
+    var fs=fouls(t,n),sel=S.sel&&S.sel.t==t&&S.sel.n==n;
+    h+='<div class="pl'+(sel?' sel':'')+(fs.length>=5?' out':'')+'" onclick="pick(\''+t+'\',\''+esc(n)+'\')"><span class="n">'+esc(n)+'</span><span class="p">'+pts(t,n)+'</span><span class="f">'+fs.map(x=>'<i>'+x+'</i>').join('')+'</span>'+(sel?'<button onclick="event.stopPropagation();delP(\''+t+'\',\''+esc(n)+'\')" style="border:1px solid var(--bd);background:transparent;color:var(--fg);border-radius:4px">×</button>':'')+nml(t,n,sel)+stl(t,n)+'</div>';
+  });
+  h+='<div class="add"><input id="in'+t+'" placeholder="背番号" inputmode="numeric" onkeydown="if(event.key==\'Enter\')addP(\''+t+'\')"><button onclick="addP(\''+t+'\')">追加</button></div>';
+  if(S.pl[t].length)h+='<div style="font-size:11px;color:var(--mut);margin-top:4px">選手を選ぶと名前入力と×（削除）が出ます</div>';
+  return h+'</div>';
+}
+function logView(){
+  var h='<div class="log"><table><tr><th></th>'+QL.map(x=>'<th>'+x+'</th>').join('')+'<th>計</th></tr>';
+  ['A','B'].forEach(function(t){
+    h+='<tr><th>'+esc(S.names[t])+'</th>';
+    for(var q=1;q<=5;q++)h+='<td>'+S.log.filter(e=>e.k=='pt'&&e.t==t&&e.q==q).reduce((a,e)=>a+e.v,0)+'</td>';
+    h+='<td><b>'+score(t)+'</b></td></tr>';
+  });
+  h+='</table>';
+  ['A','B'].forEach(function(t){
+    var nums=S.pl[t].slice();S.log.forEach(function(e){if(e.t==t&&e.n!=null&&nums.indexOf(e.n)<0)nums.push(e.n)});
+    nums.sort((a,b)=>parseInt(a)-parseInt(b));
+    h+='<table style="margin-top:10px"><tr><th colspan="7">'+esc(S.names[t])+' 個人成績</th></tr><tr><th>No.</th><th>得点</th><th>AST</th><th>REB</th><th>STL</th><th>BLK</th><th>F</th></tr>';
+    nums.forEach(function(n){h+='<tr><td style="text-align:left"><b>'+esc(n)+'</b> <span style="font-size:11px">'+esc(nmOf(t,n))+'</span></td><td>'+pts(t,n)+'</td><td>'+stc(t,n,'AST')+'</td><td>'+stc(t,n,'REB')+'</td><td>'+stc(t,n,'STL')+'</td><td>'+stc(t,n,'BLK')+'</td><td>'+fouls(t,n).length+'</td></tr>'});
+    h+='</table>'});
+  h+='<div class="rs">';
+  ['A','B'].forEach(function(t){
+    var run=0;h+='<div class="'+t+'"><b>'+esc(S.names[t])+' ランニングスコア</b>';
+    S.log.filter(e=>e.k=='pt'&&e.t==t).forEach(function(e){run+=e.v;h+='<div class="it"><span>'+run+'</span><span class="x">#'+esc(e.n)+' +'+e.v+'</span><span>Q'+QL[e.q-1]+'</span></div>'});
+    h+='<div style="margin-top:8px"><b>タイムアウト</b></div>';
+    var ts=S.log.filter(e=>e.k=='to'&&e.t==t);
+    if(!ts.length)h+='<div class="it"><span>なし</span></div>';
+    ts.forEach(function(e,i){h+='<div class="it"><span>'+(i+1)+'回目</span><span>'+esc(e.tm||'—')+'</span><span>Q'+QL[e.q-1]+'</span></div>'});
+    h+='</div>';
+  });
+  h+='</div><p style="margin-top:14px"><button onclick="resetAll()" style="padding:8px 12px">'+(RC?'もう一度押すと全消去':'試合をリセット')+'</button></p></div>';
+  return h;
+}
+function sheet(){
+  var d=new Date(),ds=d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日';
+  var h='<div class="sh"><div class="in"><div class="hd"><span>A: '+esc(S.names.A)+'　B: '+esc(S.names.B)+'</span><span>日付 '+ds+'</span></div><div class="main"><div class="L">';
+  ['A','B'].forEach(function(t){
+    var nums=S.pl[t].slice();S.log.forEach(function(e){if(e.t==t&&e.n!=null&&nums.indexOf(e.n)<0)nums.push(e.n)});
+    nums.sort((a,b)=>parseInt(a)-parseInt(b));
+    h+='<b>チーム'+t+'：'+esc(S.names[t])+'</b><table><tr><th>No.</th><th>得点</th><th colspan="5">ファウル</th></tr>';
+    nums.forEach(function(n){var f=fouls(t,n);h+='<tr><td style="text-align:left"><b>'+esc(n)+'</b> <span style="font-size:10px">'+esc(nmOf(t,n))+'</span></td><td>'+pts(t,n)+'</td>';for(var i=0;i<5;i++)h+='<td style="width:20px">'+(f[i]||'')+'</td>';h+='</tr>'});
+    if(!nums.length)h+='<tr><td colspan="7">選手なし</td></tr>';
+    h+='<tr><th colspan="2">チームF</th>';
+    for(var q=1;q<=4;q++)h+='<td colspan="1" style="font-size:10px">Q'+q+':'+tf(t,q)+'</td>';
+    h+='<td>OT:'+tf(t,5)+'</td></tr>';
+    h+='<tr><th colspan="2">タイムアウト</th><td colspan="5" style="text-align:left">';
+    [['前半',1,2,2],['後半',3,4,3],['OT',5,5,1]].forEach(function(x){var u=toIn(t,x[1],x[2]),z='';for(var i=0;i<Math.max(x[3],u);i++)z+=i<u?'■':'□';h+=x[0]+' '+z+'　'});
+    h+='</td></tr></table>';
+  });
+  h+='</div><div><div style="font-weight:700;margin-bottom:2px">ランニングスコア</div><div class="rsb">';
+  var M={A:{},B:{}},QE={A:{},B:{}};
+  ['A','B'].forEach(function(t){var run=0;S.log.filter(e=>e.k=='pt'&&e.t==t).forEach(function(e){for(var k=run+1;k<=run+e.v;k++)M[t][k]={last:k==run+e.v,v:e.v,n:e.n};run+=e.v});
+    for(var q=1;q<=5;q++){var c=S.log.filter(e=>e.k=='pt'&&e.t==t&&e.q<=q).reduce((a,e)=>a+e.v,0);if(c>0&&S.log.some(e=>e.k=='pt'&&e.t==t&&e.q==q))QE[t][c]=1}});
+  for(var b=0;b<4;b++){
+    h+='<table><tr><th>A</th><th>B</th></tr>';
+    for(var r=1;r<=40;r++){var k=b*40+r;h+='<tr>';
+      ['A','B'].forEach(function(t){var m=M[t][k],c=m?'<s>'+k+'</s>'+(m.last?(m.v==1?'●':'<span class="pn">'+esc(m.n)+'</span>'):''):k;
+        h+='<td style="'+(QE[t][k]?'border-bottom:3px solid #111;':'')+(m?'background:#fff3d6':'')+'">'+c+'</td>'});
+      h+='</tr>'}
+    h+='</table>'}
+  h+='</div></div></div>';
+  h+='<table class="tot"><tr><th>クォーター</th><th>A</th><th>B</th></tr>';
+  var ta=0,tb=0;
+  for(var q=1;q<=5;q++){var a=S.log.filter(e=>e.k=='pt'&&e.t=='A'&&e.q==q).reduce((x,e)=>x+e.v,0),bb=S.log.filter(e=>e.k=='pt'&&e.t=='B'&&e.q==q).reduce((x,e)=>x+e.v,0);
+    if(q==5&&!a&&!bb)continue;h+='<tr><td>'+(q<5?'第'+q+'クォーター':'オーバータイム')+'</td><td>'+a+'</td><td>'+bb+'</td></tr>'}
+  ta=score('A');tb=score('B');
+  h+='<tr><th>最終スコア</th><th>'+ta+'</th><th>'+tb+'</th></tr><tr><th>勝者チーム</th><td colspan="2"><b>'+(ta==tb?'—':esc(S.names[ta>tb?'A':'B']))+'</b></td></tr></table></div></div>';
+  return h;
+}
+function pm(m){document.getElementById('pm').textContent=m}
+async function savePdf(){
+  if(!window.html2canvas||!window.jspdf){return pm('PDF作成ライブラリを読み込めませんでした')}
+  var dl=null;try{dl=window.claude&&await window.claude.use('downloads')}catch(e){}
+  if(!dl)return pm('この画面ではPDFを保存できません（公開ページのリンクから開いてください）');
+  pm('PDFを作成中…');
+  try{
+    var pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4',orientation:'p'}),first=true;
+    var parts=[sheet(),logView()];
+    for(var i=0;i<parts.length;i++){
+      var box=document.createElement('div');
+      box.style.cssText='position:fixed;left:-9999px;top:0;width:800px;padding:10px;background:#fff;color:#111;--bg:#fff;--fg:#111;--card:#fff;--bd:#999;--mut:#555;--sel:#fde68a';
+      box.innerHTML=parts[i];
+      box.querySelectorAll('button').forEach(function(b){b.remove()});
+      box.querySelectorAll('.rs').forEach(function(b){b.remove()});
+      document.body.appendChild(box);
+      var cv;try{cv=await window.html2canvas(box,{scale:2,backgroundColor:'#fff'})}finally{box.remove()}
+      var pw=190,ph=277,k=pw/cv.width,pageH=Math.floor(ph/k);
+      for(var y=0;y<cv.height;y+=pageH){
+        var h=Math.min(pageH,cv.height-y),c2=document.createElement('canvas');
+        c2.width=cv.width;c2.height=h;c2.getContext('2d').drawImage(cv,0,y,cv.width,h,0,0,cv.width,h);
+        if(!first)pdf.addPage();first=false;
+        pdf.addImage(c2.toDataURL('image/jpeg',0.92),'JPEG',10,10,pw,h*k);
+      }
+    }
+    var d=new Date(),fn='scoresheet_'+d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2)+'.pdf';
+    await dl.save({filename:fn,data:pdf.output('blob')});
+    pm('PDFを保存しました');
+  }catch(e){pm(e&&e.code=='declined'?'保存をキャンセルしました':'PDFの保存に失敗しました'+(e&&e.message?'：'+e.message:''))}
+}
+function R(){
+  document.getElementById('q').innerHTML=QL.map((x,i)=>'<button class="'+(S.q==i+1?'on':'')+'" onclick="setQ('+(i+1)+')">'+(i<4?'Q':'')+x+'</button>').join('');
+  document.getElementById('vb').textContent=S.view=='play'?'記録表':S.view=='log'?'スコアシート':'入力へ';
+  document.getElementById('bar').style.display=S.view=='play'?'block':'none';
+  document.getElementById('main').innerHTML=S.view=='play'?'<div class="cols">'+col('A')+col('B')+'</div>':S.view=='log'?logView():sheet();
+  if(S.sel&&S.view=='play'&&!document.getElementById('st').textContent)st('選択中: '+S.names[S.sel.t]+' #'+S.sel.n);
+  save();
+}
+R();
+</script></body></html>
